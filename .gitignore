@@ -1,3 +1,9 @@
+# NPM Module
 node_modules/
+
+# Build files
 *.tsbuildinfo
 dist/
+
+# Environemnt variable
+.env
