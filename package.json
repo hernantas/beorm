@@ -1,0 +1,29 @@
+{
+  "name": "beorm",
+  "description": "Simple ORM for typescript / javascript",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hernantas/beorm.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hernantas/beorm/issues"
+  },
+  "homepage": "https://github.com/hernantas/beorm#readme",
+  "author": "Zulfikar Raditya Hernanta <hernantas@gmail.com>",
+  "keywords": [
+    "orm",
+    "mongo",
+    "mongodb",
+    "mysql",
+    "mariadb",
+    "postgre",
+    "postgresql",
+    "sqlite",
+    "sqlite3",
+    "ts",
+    "typescript",
+    "js",
+    "javascript"
+  ]
+}
