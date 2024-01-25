@@ -246,6 +246,12 @@ export class Entry {
   public newEntity(): ObjectType {
     return this.parser.decode(this.raw, this.table.schema)
   }
+
+  public hydrate(entity: ObjectType): void {
+    this.properties
+      .filter((prop) => prop.active)
+      .forEach((prop) => (entity[prop.column.name] = prop.value))
+  }
 }
 
 export class EntryProperty {

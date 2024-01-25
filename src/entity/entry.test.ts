@@ -298,6 +298,19 @@ describe('Entry', () => {
     expect(entry.newEntity()).toStrictEqual(mRaw)
   })
 
+  it('Entry should hydrate entity based on its current value', () => {
+    const mRaw = {
+      ...raw,
+      id: 3,
+    }
+    const entry = registry.create()
+    entry.raw = mRaw
+
+    const rRaw = {}
+    entry.hydrate(rRaw)
+    expect(rRaw).toStrictEqual(mRaw)
+  })
+
   describe('Entry Property', () => {
     const schema = object({
       id: number().set('id', true),
