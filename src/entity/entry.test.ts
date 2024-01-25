@@ -4,7 +4,7 @@ import { Entry, EntryRegistry } from './entry'
 
 describe('Entry', () => {
   const schema = object({
-    id: number().set('id', true),
+    id: number().optional().set('id', true).set('generated', true),
     key: string(),
     value: string().optional(),
   }).set('entity', 'entry')
@@ -276,11 +276,26 @@ describe('Entry', () => {
   })
 
   it('Same "id" in the same storage should throw', () => {
+    const mRaw = {
+      ...raw,
+      id: 1,
+    }
+
     const entry1 = registry.create()
-    entry1.raw = { id: 1 }
+    entry1.raw = mRaw
 
     const entry2 = registry.create()
-    expect(() => (entry2.raw = { id: 1 })).toThrow()
+    expect(() => (entry2.raw = mRaw)).toThrow()
+  })
+
+  it('Entry should create entity based on its current value', () => {
+    const mRaw = {
+      ...raw,
+      id: 2,
+    }
+    const entry = registry.create()
+    entry.raw = mRaw
+    expect(entry.newEntity()).toStrictEqual(mRaw)
   })
 
   describe('Entry Property', () => {

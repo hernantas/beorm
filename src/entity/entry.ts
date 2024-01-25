@@ -120,7 +120,7 @@ export class Entry {
   private _refresh: boolean = false
 
   public constructor(
-    parser: Parser,
+    private readonly parser: Parser,
     private readonly registry: EntryRegistry,
     public readonly table: TableMetadata,
   ) {
@@ -241,6 +241,10 @@ export class Entry {
     this.properties
       .filter((prop) => Object.hasOwn(value, prop.column.name))
       .forEach((prop) => (prop.value = value[prop.column.name]))
+  }
+
+  public newEntity(): ObjectType {
+    return this.parser.decode(this.raw, this.table.schema)
   }
 }
 
