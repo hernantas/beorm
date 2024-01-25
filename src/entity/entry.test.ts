@@ -149,9 +149,25 @@ describe('Entry', () => {
     testValue(entry, {})
   })
 
-  describe('State: New => Initialize', () => {
+  describe('State: New => Initialize(true)', () => {
     const entry = registry.create()
-    entry.initialize()
+    entry.initialized = true
+    testActive(entry, false)
+    testInitialized(entry, false)
+    testLoad(entry, false)
+    testPreload(entry, false)
+    testReload(entry, false)
+    testDelete(entry, false)
+    testDirty(entry, false)
+    testInsert(entry, false)
+    testUpdate(entry, false)
+    testRaw(entry, {})
+    testValue(entry, {})
+  })
+
+  describe('State: New => Initialize(false)', () => {
+    const entry = registry.create()
+    entry.initialized = false
     testActive(entry, false)
     testInitialized(entry, false)
     testLoad(entry, false)
@@ -232,10 +248,10 @@ describe('Entry', () => {
     testValue(entry, raw)
   })
 
-  describe('State: New => Modify => Initialize', () => {
+  describe('State: New => Modify => Initialize(true)', () => {
     const entry = registry.create()
     entry.raw = raw
-    entry.initialize()
+    entry.initialized = true
     testActive(entry, true)
     testInitialized(entry, true)
     testLoad(entry, false)
@@ -249,7 +265,25 @@ describe('Entry', () => {
     testValue(entry, raw)
   })
 
-  describe('State: New => Modify => Initialize => Modify', () => {
+  describe('State: New => Modify => Initialize(true) => Initialize(false)', () => {
+    const entry = registry.create()
+    entry.raw = raw
+    entry.initialized = true
+    entry.initialized = false
+    testActive(entry, true)
+    testInitialized(entry, false)
+    testLoad(entry, false)
+    testPreload(entry, false)
+    testReload(entry, false)
+    testDelete(entry, false)
+    testDirty(entry, true)
+    testInsert(entry, true)
+    testUpdate(entry, false)
+    testRaw(entry, raw)
+    testValue(entry, raw)
+  })
+
+  describe('State: New => Modify => Initialize(true) => Modify', () => {
     const newRaw = {
       key: 'new-key',
       value: 'new-value',
@@ -260,7 +294,7 @@ describe('Entry', () => {
       key: 'key',
       value: 'value',
     }
-    entry.initialize()
+    entry.initialized = true
     entry.raw = newRaw
     testActive(entry, true)
     testInitialized(entry, true)
@@ -447,11 +481,11 @@ describe('Entry', () => {
 
     describe('State: New => Initialize', () => {
       const entry = registry.create()
-      entry.property(id)!.initialize()
-      entry.property(singleValue)!.initialize()
-      entry.property(singleValueGenerated)!.initialize()
-      entry.property(collectionValue)!.initialize()
-      entry.property(collectionValueGenerated)!.initialize()
+      entry.property(id)!.initialized = true
+      entry.property(singleValue)!.initialized = true
+      entry.property(singleValueGenerated)!.initialized = true
+      entry.property(collectionValue)!.initialized = true
+      entry.property(collectionValueGenerated)!.initialized = true
 
       testPropertyActive(id, entry, true)
       testPropertyInitialized(id, entry, true)

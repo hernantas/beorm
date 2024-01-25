@@ -179,10 +179,10 @@ export class Entry {
     return this.properties.find((prop) => prop.initialized) !== undefined
   }
 
-  public initialize(): void {
+  public set initialized(value: boolean) {
     this.properties
       .filter((prop) => prop.active)
-      .forEach((prop) => prop.initialize())
+      .forEach((prop) => (prop.initialized = value))
   }
 
   public get dirty(): boolean {
@@ -279,9 +279,9 @@ export class EntryProperty {
     return this._initialized
   }
 
-  public initialize(): void {
+  public set initialized(value: boolean) {
     this.activate()
-    this._initialized = true
+    this._initialized = value
     this.sync()
   }
 
