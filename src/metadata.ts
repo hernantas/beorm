@@ -9,34 +9,17 @@ import {
   string,
 } from 'tipets'
 
-export class MetadataRegistry {
-  private readonly tables: Map<string, TableMetadata> = new Map()
-
-  public constructor(schemas: Schema[] = []) {
-    schemas.forEach((schema) => this.get(schema))
-  }
-
-  public get(schema: Schema): TableMetadata {
-    const name = readSchema(schema, 'entity', string())
-    const table = this.tables.get(name)
-    if (table !== undefined) {
-      return table
-    }
-
-    const newTable = new TableMetadata(name, schema)
-    this.tables.set(name, newTable)
-    return newTable
-  }
+export function getMetadata(schema: Schema): TableMetadata {
+  return new TableMetadata(schema)
 }
 
 export class TableMetadata {
+  public readonly name: string
   public readonly columns: ColumnMetadata[] = []
   public readonly id: ColumnMetadata
 
-  public constructor(
-    public readonly name: string,
-    public readonly schema: Schema,
-  ) {
+  public constructor(public readonly schema: Schema) {
+    this.name = readSchema(schema, 'entity', string())
     // try to get column
     traverse(
       (schema, prevValue) =>

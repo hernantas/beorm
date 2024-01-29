@@ -1,15 +1,14 @@
 import { TypeOf, number, object, string } from 'tipets'
-import { MetadataRegistry } from '../metadata'
+import { getMetadata } from '../metadata'
 import { EntityRegistry } from './entity'
 
 describe('Entity Registry', () => {
-  const metadata = new MetadataRegistry()
   const schema = object({
     id: number().optional().set('id', true).set('generated', true),
     key: string(),
     value: string().optional(),
   }).set('entity', 'entity_name')
-  const table = metadata.get(schema)
+  const table = getMetadata(schema)
   const registry = new EntityRegistry(table)
   type Data = TypeOf<typeof schema>
 

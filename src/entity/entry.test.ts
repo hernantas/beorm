@@ -1,5 +1,5 @@
 import { Parser, number, object, string } from 'tipets'
-import { ColumnMetadata, MetadataRegistry } from '../metadata'
+import { ColumnMetadata, getMetadata } from '../metadata'
 import { Entry, EntryRegistry } from './entry'
 
 describe('Entry', () => {
@@ -9,8 +9,7 @@ describe('Entry', () => {
     value: string().optional(),
   }).set('entity', 'entry')
   const parser = Parser.create()
-  const metadata = new MetadataRegistry()
-  const table = metadata.get(schema)
+  const table = getMetadata(schema)
   const registry = new EntryRegistry(parser, table)
 
   const raw = {
@@ -353,7 +352,7 @@ describe('Entry', () => {
       collectionValue: number().array(),
       collectionValueGenerated: number().array().set('generated', true),
     }).set('entity', 'entry_property')
-    const table = metadata.get(schema)
+    const table = getMetadata(schema)
     const registry = new EntryRegistry(parser, table)
 
     const testPropertyActive = (
