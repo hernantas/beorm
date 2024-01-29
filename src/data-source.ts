@@ -18,6 +18,16 @@ export class DataSource {
   }
 
   /**
+   * Start a database transaction
+   *
+   * @param fn Function executed within transaction context
+   * @returns Result of the transaction
+   */
+  public transaction<T>(fn: TransactionFn<T>): Promise<T> {
+    return this.instance.transaction(fn)
+  }
+
+  /**
    * Get raw query builder from current data connection.
    *
    * @returns Raw query builder
@@ -26,6 +36,8 @@ export class DataSource {
     return this.instance.queryBuilder()
   }
 }
+
+export type TransactionFn<T> = (trx: Knex.Transaction) => void | Promise<T>
 
 export interface DataSourceOptions {
   client:
