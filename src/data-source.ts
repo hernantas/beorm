@@ -35,6 +35,10 @@ export class DataSource {
   public query(): Knex.QueryBuilder {
     return this.instance.queryBuilder()
   }
+
+  public async close(): Promise<void> {
+    return this.instance.destroy()
+  }
 }
 
 export type TransactionFn<T> = (trx: Knex.Transaction) => void | Promise<T>
