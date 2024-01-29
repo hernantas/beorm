@@ -238,6 +238,15 @@ export class Entry {
       .forEach((prop) => (prop.raw = value[prop.column.name]))
   }
 
+  public applyRaw(value: ObjectType, fn: (prop: EntryProperty) => void): void {
+    this.properties
+      .filter((prop) => Object.hasOwn(value, prop.column.name))
+      .forEach((prop) => {
+        prop.raw = value[prop.column.name]
+        fn(prop)
+      })
+  }
+
   public get value(): ObjectType {
     return this.properties
       .filter((prop) => prop.active)
