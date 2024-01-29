@@ -20,10 +20,10 @@ export class EntryRegistry {
 
   public clear(): void {
     this.idMap.clear()
-    this.loadQueue.clear()
-    this.insertQueue.clear()
-    this.updateQueue.clear()
-    this.deleteQueue.clear()
+    this.clearLoad()
+    this.clearInsert()
+    this.clearUpdate()
+    this.clearDelete()
   }
 
   public get(): IterableIterator<Entry> {
@@ -64,6 +64,10 @@ export class EntryRegistry {
     this.loadQueue.delete(entry)
   }
 
+  public clearLoad(): void {
+    this.loadQueue.clear()
+  }
+
   public getInsert(): IterableIterator<Entry> {
     return this.insertQueue.values()
   }
@@ -79,6 +83,10 @@ export class EntryRegistry {
 
   public unregisterInsert(entry: Entry): void {
     this.insertQueue.delete(entry)
+  }
+
+  public clearInsert(): void {
+    this.insertQueue.clear()
   }
 
   public getUpdate(): IterableIterator<Entry> {
@@ -98,6 +106,10 @@ export class EntryRegistry {
     this.updateQueue.delete(entry)
   }
 
+  public clearUpdate(): void {
+    this.updateQueue.clear()
+  }
+
   public getDelete(): IterableIterator<Entry> {
     return this.deleteQueue.values()
   }
@@ -112,6 +124,10 @@ export class EntryRegistry {
 
   public unregisterDelete(entry: Entry): void {
     this.deleteQueue.delete(entry)
+  }
+
+  public clearDelete(): void {
+    this.deleteQueue.clear()
   }
 }
 
