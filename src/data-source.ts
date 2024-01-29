@@ -22,7 +22,7 @@ export class DataSource {
    *
    * @returns Raw query builder
    */
-  public rawQuery(): Knex.QueryBuilder {
+  public query(): Knex.QueryBuilder {
     return this.instance.queryBuilder()
   }
 }
