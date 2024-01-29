@@ -221,6 +221,17 @@ export class Entry {
       )
   }
 
+  public get dirtyRaw(): ObjectType {
+    return this.properties
+      .filter((prop) => prop.active)
+      .filter((prop) => prop.dirty)
+      .reduce(
+        (result, prop) =>
+          Object.assign(result, { [prop.column.name]: prop.raw }),
+        {},
+      )
+  }
+
   public set raw(value: ObjectType) {
     this.properties
       .filter((prop) => Object.hasOwn(value, prop.column.name))
