@@ -1,6 +1,7 @@
-import { Parser, number, object, string } from 'tipets'
-import { ColumnMetadata, getMetadata } from '../metadata'
-import { Entry, EntryRegistry } from './entry'
+import { object, number, string, Parser } from 'tipets'
+import { getMetadata, ColumnMetadata } from '../metadata'
+import { Entry } from './entry'
+import { EntryRegistry } from './entry-registry'
 
 describe('Entry', () => {
   const schema = object({

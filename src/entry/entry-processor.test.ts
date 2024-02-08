@@ -3,8 +3,9 @@ import { ObjectType, Parser, number, object, string } from 'tipets'
 import { DataSource } from '../data-source'
 import { TableMetadata, getMetadata } from '../metadata'
 import { getEnvironment } from '../util/environment'
-import { EntryRegistry } from './entry'
+
 import { EntryProcessor } from './entry-processor'
+import { EntryRegistry } from './entry-registry'
 
 describe('Entry Processor', () => {
   const { CLIENT, HOST, PORT, USER, PASSWORD, DATABASE } = getEnvironment()

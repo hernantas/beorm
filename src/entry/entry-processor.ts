@@ -1,7 +1,7 @@
 import { Knex } from 'knex'
 import { TableMetadata } from '../metadata'
-import { EntryRegistry } from './entry'
 import { ObjectType, Parser } from 'tipets'
+import { EntryRegistry } from './entry-registry'
 
 export class EntryProcessor {
   public constructor(
