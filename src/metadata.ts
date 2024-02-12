@@ -9,8 +9,23 @@ import {
   string,
 } from 'tipets'
 
-export function getMetadata(schema: Schema): TableMetadata {
-  return new TableMetadata(schema)
+export class MetadataRegistry {
+  private readonly tables: Map<Schema, TableMetadata> = new Map()
+
+  public constructor(schemas: Schema[] = []) {
+    schemas.forEach((schema) => this.get(schema))
+  }
+
+  public get(schema: Schema): TableMetadata {
+    const table = this.tables.get(schema)
+    if (table !== undefined) {
+      return table
+    }
+
+    const newTable = new TableMetadata(schema)
+    this.tables.set(schema, newTable)
+    return newTable
+  }
 }
 
 export class TableMetadata {

@@ -1,8 +1,11 @@
 import { Knex, knex } from 'knex'
+import { MetadataRegistry } from './metadata'
 
 /** Maintain connection with the data sources. */
 export class DataSource {
   private readonly instance: Knex
+
+  private readonly _metadata: MetadataRegistry = new MetadataRegistry()
 
   public constructor(options: DataSourceOptions) {
     this.instance = knex({
@@ -15,6 +18,11 @@ export class DataSource {
         database: options.database,
       },
     })
+  }
+
+  /** Get current metadata registry context */
+  public metadata(): MetadataRegistry {
+    return this._metadata
   }
 
   /**

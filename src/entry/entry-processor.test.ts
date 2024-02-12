@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { ObjectType, Parser, number, object, string } from 'tipets'
 import { DataSource } from '../data-source'
-import { TableMetadata, getMetadata } from '../metadata'
+import { MetadataRegistry, TableMetadata } from '../metadata'
 import { getEnvironment } from '../util/environment'
 
 import { EntryProcessor } from './entry-processor'
@@ -18,6 +18,7 @@ describe('Entry Processor', () => {
     database: DATABASE,
   })
   const parser = Parser.create()
+  const metadata = new MetadataRegistry()
   const baseSchema = object({
     id: number().optional().set('id', true).set('generated', true),
     key: string(),
@@ -75,7 +76,7 @@ describe('Entry Processor', () => {
 
   it('Entry preload should be preloaded', async () => {
     const schema = baseSchema.set('entity', 'entry_preload')
-    const table = getMetadata(schema)
+    const table = metadata.get(schema)
     await truncate(table)
 
     const row = await insertOne(table, createRaw(table, 1))
@@ -97,7 +98,7 @@ describe('Entry Processor', () => {
 
   it('Entry reload should be reloaded', async () => {
     const schema = baseSchema.set('entity', 'entry_reload')
-    const table = getMetadata(schema)
+    const table = metadata.get(schema)
     await truncate(table)
 
     const row = await insertOne(table, createRaw(table, 1))
@@ -119,7 +120,7 @@ describe('Entry Processor', () => {
 
   it('Entry should insert when its new and dirty', async () => {
     const schema = baseSchema.set('entity', 'entry_insert')
-    const table = getMetadata(schema)
+    const table = metadata.get(schema)
     await truncate(table)
 
     const registry = new EntryRegistry(parser, table)
@@ -137,7 +138,7 @@ describe('Entry Processor', () => {
 
   it('Modified initialized entry should update when dirty', async () => {
     const schema = baseSchema.set('entity', 'entry_update')
-    const table = getMetadata(schema)
+    const table = metadata.get(schema)
     await truncate(table)
 
     const registry = new EntryRegistry(parser, table)
@@ -160,7 +161,7 @@ describe('Entry Processor', () => {
 
   it('Deleted entry should also delete the database row', async () => {
     const schema = baseSchema.set('entity', 'entry_delete')
-    const table = getMetadata(schema)
+    const table = metadata.get(schema)
     await truncate(table)
 
     const registry = new EntryRegistry(parser, table)
