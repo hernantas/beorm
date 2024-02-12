@@ -34,15 +34,15 @@ export class TableMetadata {
   public readonly id: ColumnMetadata
 
   public constructor(public readonly schema: Schema) {
-    this.name = readSchema(schema, 'entity', string())
+    this.name = SchemaReader.entity(schema)
     // try to get column
-    traverse(
-      (schema, prevValue) =>
+    SchemaReader.traverse(
+      (schema, innerValue) =>
         ObjectSchema.is(schema)
           ? Object.entries(schema.properties).map(([key, schema]) =>
               createColumn(this, key, schema, true),
             )
-          : prevValue,
+          : innerValue,
       schema,
     )
 
@@ -65,20 +65,11 @@ function createColumn(
   schema: Schema,
   declared: boolean = false,
 ): ColumnMetadata {
-  const id: boolean = readSchema(schema, 'id', boolean().optional()) ?? false
-  const generated: boolean =
-    readSchema(schema, 'generated', boolean().optional()) ?? false
-  const nullable: boolean =
-    traverse(
-      (schema, prevValue) =>
-        NullableSchema.is(schema) || OptionalSchema.is(schema) || prevValue,
-      schema,
-    ) ?? false
-  const collection: boolean =
-    traverse(
-      (schema, prevValue) => ArraySchema.is(schema) || prevValue,
-      schema,
-    ) ?? false
+  const id: boolean = SchemaReader.id(schema)
+  const generated: boolean = SchemaReader.generated(schema)
+  const nullable: boolean = SchemaReader.nullable(schema)
+  const collection: boolean = SchemaReader.collection(schema)
+
   const column: ColumnMetadata = {
     table,
     name,
@@ -112,45 +103,77 @@ export interface ColumnMetadata {
   readonly collection: boolean
 }
 
-/**
- * Read given {@link Schema} for given name metadata value
- *
- * @param schema {@link Schema} to be read
- * @param name Metadata attribute name
- * @param type Type or {@link Schema} used to read metadata value
- * @returns A value if metadata exists, undefined otherwise
- */
-function readSchema<S extends Schema>(
-  schema: Schema,
-  name: string,
-  type: S,
-): TypeOf<S> {
-  const value = traverse<TypeOf<S>>(
-    (schema, prevValue) => schema.get(name) ?? prevValue,
-    schema,
-  )
-  if (type.is(value)) {
-    return value
+class SchemaReader {
+  /**
+   * Read deepest {@link Schema} for its value using given function and return
+   * its value
+   *
+   * @param fn A function to read given schema and return a value
+   * @param schema {@link Schema} to be traversed
+   */
+  public static traverse<T>(
+    fn: (schema: Schema, innerValue: T | undefined) => T | undefined,
+    schema: Schema,
+  ): T | undefined {
+    const innerValue =
+      ArraySchema.is(schema) ||
+      NullableSchema.is(schema) ||
+      OptionalSchema.is(schema)
+        ? SchemaReader.traverse(fn, schema.type)
+        : undefined
+    return fn(schema, innerValue)
   }
-  throw new Error(`Cannot read "${name}" metadata value from given schema`)
-}
 
-/**
- * Read deepest {@link Schema} for its value using given function and return its
- * value
- *
- * @param fn A function to read given schema and return a value
- * @param schema {@link Schema} to be traversed
- */
-function traverse<T>(
-  fn: (schema: Schema, previousValue: T | undefined) => T | undefined,
-  schema: Schema,
-): T | undefined {
-  const previousValue =
-    ArraySchema.is(schema) ||
-    NullableSchema.is(schema) ||
-    OptionalSchema.is(schema)
-      ? fn(schema.type, undefined)
-      : undefined
-  return fn(schema, previousValue)
+  public static nullable(schema: Schema): boolean {
+    return (
+      SchemaReader.traverse(
+        (schema) => NullableSchema.is(schema) || OptionalSchema.is(schema),
+        schema,
+      ) ?? false
+    )
+  }
+
+  public static collection(schema: Schema): boolean {
+    return (
+      SchemaReader.traverse(
+        (schema, innerValue) => ArraySchema.is(schema) || innerValue,
+        schema,
+      ) ?? false
+    )
+  }
+
+  /**
+   * Read given {@link Schema} for given name metadata value
+   *
+   * @param schema {@link Schema} to be read
+   * @param name Metadata attribute name
+   * @param type Type or {@link Schema} used to read metadata value
+   * @returns A value if metadata exists, undefined otherwise
+   */
+  public static read<S extends Schema>(
+    schema: Schema,
+    name: string,
+    type: S,
+  ): TypeOf<S> {
+    const value = SchemaReader.traverse<TypeOf<S>>(
+      (schema, innerValue) => schema.get(name) ?? innerValue,
+      schema,
+    )
+    if (type.is(value)) {
+      return value
+    }
+    throw new Error(`Cannot read "${name}" metadata value from given schema`)
+  }
+
+  public static entity(schema: Schema): string {
+    return SchemaReader.read(schema, 'entity', string())
+  }
+
+  public static id(schema: Schema): boolean {
+    return SchemaReader.read(schema, 'id', boolean().optional()) ?? false
+  }
+
+  public static generated(schema: Schema): boolean {
+    return SchemaReader.read(schema, 'generated', boolean().optional()) ?? false
+  }
 }
