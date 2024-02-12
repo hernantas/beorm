@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { ObjectType, Parser, number, object, string } from 'tipets'
 import { DataSource } from '../data-source'
-import { MetadataRegistry, TableMetadata } from '../metadata'
+import { Metadata, TableMetadata } from '../metadata'
 import { getEnvironment } from '../util/environment'
 
 import { EntryProcessor } from './entry-processor'
@@ -18,7 +18,7 @@ describe('Entry Processor', () => {
     database: DATABASE,
   })
   const parser = Parser.create()
-  const metadata = new MetadataRegistry()
+  const metadata = new Metadata()
   const baseSchema = object({
     id: number().optional().set('id', true).set('generated', true),
     key: string(),

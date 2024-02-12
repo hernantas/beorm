@@ -9,22 +9,27 @@ import {
   string,
 } from 'tipets'
 
-export class MetadataRegistry {
-  private readonly tables: Map<Schema, TableMetadata> = new Map()
+export class Metadata {
+  private readonly registry: MetadataRegistry = new MetadataRegistry()
 
   public constructor(schemas: Schema[] = []) {
-    schemas.forEach((schema) => this.get(schema))
+    schemas.forEach((schema) => this.registry.get(schema))
   }
 
   public get(schema: Schema): TableMetadata {
-    const table = this.tables.get(schema)
-    if (table !== undefined) {
-      return table
-    }
+    return this.registry.get(schema)
+  }
+}
 
-    const newTable = new TableMetadata(schema)
-    this.tables.set(schema, newTable)
-    return newTable
+class MetadataRegistry {
+  private readonly tables: Map<Schema, TableMetadata> = new Map()
+
+  public get(schema: Schema): TableMetadata {
+    return this.tables.get(schema) ?? new TableMetadata(this, schema)
+  }
+
+  public register(table: TableMetadata): void {
+    this.tables.set(table.schema, table)
   }
 }
 
@@ -33,8 +38,13 @@ export class TableMetadata {
   public readonly columns: ColumnMetadata[] = []
   public readonly id: ColumnMetadata
 
-  public constructor(public readonly schema: Schema) {
+  public constructor(
+    registry: MetadataRegistry,
+    public readonly schema: Schema,
+  ) {
     this.name = SchemaReader.entity(schema)
+    registry.register(this)
+
     // try to get column
     SchemaReader.traverse(
       (schema, innerValue) =>

@@ -1,5 +1,5 @@
 import { number, object, string } from 'tipets'
-import { MetadataRegistry } from './metadata'
+import { Metadata } from './metadata'
 
 describe('Table Metadata', () => {
   const schema = object({
@@ -10,7 +10,7 @@ describe('Table Metadata', () => {
     optional: string().optional(),
     collection: string().array(),
   }).set('entity', 'entity_name')
-  const table = new MetadataRegistry().get(schema)
+  const table = new Metadata().get(schema)
 
   it('Should have table name set in the metadata', () => {
     expect(table.name).toEqual('entity_name')
