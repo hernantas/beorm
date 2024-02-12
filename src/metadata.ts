@@ -22,27 +22,30 @@ export class Metadata {
 }
 
 class MetadataRegistry {
-  private readonly tables: Map<Schema, TableMetadata> = new Map()
+  private readonly tables: Map<string, TableMetadata> = new Map()
 
   public get(schema: Schema): TableMetadata {
-    return this.tables.get(schema) ?? new TableMetadata(this, schema)
+    const name = SchemaReader.entity(schema)
+    if (name === undefined) {
+      throw new Error('Cannot get entity name from schema')
+    }
+    return this.tables.get(name) ?? new TableMetadata(this, name, schema)
   }
 
   public register(table: TableMetadata): void {
-    this.tables.set(table.schema, table)
+    this.tables.set(table.name, table)
   }
 }
 
 export class TableMetadata {
-  public readonly name: string
   public readonly columns: ColumnMetadata[] = []
   public readonly id: ColumnMetadata
 
   public constructor(
     registry: MetadataRegistry,
+    public readonly name: string,
     public readonly schema: Schema,
   ) {
-    this.name = SchemaReader.entity(schema)
     registry.register(this)
 
     // try to get column
@@ -175,8 +178,8 @@ class SchemaReader {
     throw new Error(`Cannot read "${name}" metadata value from given schema`)
   }
 
-  public static entity(schema: Schema): string {
-    return SchemaReader.read(schema, 'entity', string())
+  public static entity(schema: Schema): string | undefined {
+    return SchemaReader.read(schema, 'entity', string().optional())
   }
 
   public static id(schema: Schema): boolean {
