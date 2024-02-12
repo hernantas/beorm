@@ -6,7 +6,9 @@ import {
   Schema,
   TypeOf,
   boolean,
+  literal,
   string,
+  union,
 } from 'tipets'
 
 export class Metadata {
@@ -38,7 +40,8 @@ class MetadataRegistry {
 }
 
 export class TableMetadata {
-  public readonly columns: ColumnMetadata[] = []
+  public readonly baseColumns: ColumnMetadata[] = []
+  public readonly relationColumns: RelationColumnMetadata[] = []
   public readonly id: ColumnMetadata
 
   public constructor(
@@ -48,7 +51,7 @@ export class TableMetadata {
   ) {
     registry.register(this)
 
-    this.columns =
+    const columns =
       SchemaReader.traverse<ColumnMetadata[]>(
         (schema, innerValue) =>
           ObjectSchema.is(schema)
@@ -59,17 +62,74 @@ export class TableMetadata {
         schema,
       ) ?? []
 
-    const id = this.columns.find((column) => column.id)
-    if (id !== undefined) {
-      this.id = id
-    } else {
+    const id = columns.find((column) => column.id)
+    if (id === undefined) {
       throw new Error(`"${this.name}" entity schema must have an id column`)
     }
+    this.id = id
+
+    for (const column of columns) {
+      const rel = SchemaReader.entity(column.schema)
+      if (rel === undefined) {
+        this.baseColumns.push(column)
+      } else {
+        const sourceTable = column.table
+        const foreignTable = registry.get(column.schema)
+
+        const _owner = SchemaReader.owner(column.schema)
+        const owner = column.collection ? 'foreign' : _owner
+
+        const targetTable = owner === 'source' ? foreignTable : sourceTable
+        const targetColumn = targetTable.id
+
+        const joinColumnName =
+          SchemaReader.join(schema) ??
+          `${targetTable.name}_${targetColumn.name}`
+
+        const ownerTable = owner === 'source' ? sourceTable : foreignTable
+        const ownerColumn =
+          ownerTable.column(joinColumnName) ??
+          addBaseColumn(
+            ownerTable,
+            joinColumnName,
+            targetColumn.schema.set('id', false).set('generated', false),
+          )
+
+        const sourceColumn = owner === 'source' ? ownerColumn : targetColumn
+        const foreignColumn = owner === 'foreign' ? targetColumn : ownerColumn
+        const relation = {
+          owner,
+          sourceColumn,
+          foreignColumn,
+        }
+
+        const relationColumn: RelationColumnMetadata = {
+          ...column,
+          relation,
+        }
+        this.relationColumns.push(relationColumn)
+      }
+    }
+  }
+
+  public get columns(): ColumnMetadata[] {
+    return this.baseColumns.concat(this.relationColumns)
   }
 
   public column(name: string): ColumnMetadata | undefined {
     return this.columns.find((col) => col.name === name)
   }
+}
+
+function addBaseColumn(
+  table: TableMetadata,
+  name: string,
+  schema: Schema,
+  declared: boolean = false,
+): ColumnMetadata {
+  const column = createColumn(table, name, schema, declared)
+  table.baseColumns.push(column)
+  return column
 }
 
 function createColumn(
@@ -113,6 +173,19 @@ export interface ColumnMetadata {
   readonly nullable: boolean
   /** Mark if column is collection column */
   readonly collection: boolean
+}
+
+export interface RelationColumnMetadata extends ColumnMetadata {
+  readonly relation: RelationMetadata
+}
+
+export interface RelationMetadata {
+  /** Owner of join column */
+  readonly owner: 'source' | 'foreign'
+  /** Column used as join column in source table */
+  readonly sourceColumn: ColumnMetadata
+  /** Column used as join column in foreign table */
+  readonly foreignColumn: ColumnMetadata
 }
 
 class SchemaReader {
@@ -187,5 +260,19 @@ class SchemaReader {
 
   public static generated(schema: Schema): boolean {
     return SchemaReader.read(schema, 'generated', boolean().optional()) ?? false
+  }
+
+  public static owner(schema: Schema): 'source' | 'foreign' {
+    return (
+      SchemaReader.read(
+        schema,
+        'owner',
+        union(literal('source'), literal('foreign')).optional(),
+      ) ?? 'source'
+    )
+  }
+
+  public static join(schema: Schema): string | undefined {
+    return SchemaReader.read(schema, 'join', string().optional())
   }
 }

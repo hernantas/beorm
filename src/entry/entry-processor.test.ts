@@ -57,7 +57,7 @@ describe('Entry Processor', () => {
       .query()
       .from(table.name)
       .insert(raw)
-      .returning(table.columns.map((c) => c.name))
+      .returning(table.baseColumns.map((c) => c.name))
     return rows[0]!
   }
 
@@ -68,7 +68,7 @@ describe('Entry Processor', () => {
     const rows: ObjectType[] = await source
       .query()
       .from(table.name)
-      .select(table.columns.map((c) => c.name))
+      .select(table.baseColumns.map((c) => c.name))
       .where(table.id.name, String(raw[table.id.name]))
     const row = rows[0]!
     expect(raw).toStrictEqual(row)
@@ -175,7 +175,7 @@ describe('Entry Processor', () => {
     const rows: ObjectType[] = await source
       .query()
       .from(table.name)
-      .select(table.columns.map((c) => c.name))
+      .select(table.baseColumns.map((c) => c.name))
     expect(rows.length).toBe(0)
   })
 

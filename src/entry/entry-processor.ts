@@ -35,7 +35,7 @@ export class EntryProcessor {
         .from(this.table.name)
         .delete()
         .whereIn(this.table.id.name, ids)
-        .returning(this.table.columns.map((col) => col.name))
+        .returning(this.table.baseColumns.map((col) => col.name))
 
       deleteEntries.forEach((entry) => {
         entry.delete = false
@@ -67,7 +67,7 @@ export class EntryProcessor {
 
     const rows: ObjectType[] = await this.transaction
       .from(this.table.name)
-      .select(this.table.columns.map((col) => col.name))
+      .select(this.table.baseColumns.map((col) => col.name))
       .whereIn(this.table.id.name, ids)
 
     rows.forEach((row) => {
@@ -99,7 +99,7 @@ export class EntryProcessor {
       const rows: ObjectType[] = await this.transaction
         .from(this.table.name)
         .insert(entry.dirtyRaw)
-        .returning(this.table.columns.map((col) => col.name))
+        .returning(this.table.baseColumns.map((col) => col.name))
       const row = rows[0]
       if (row === undefined) {
         throw new Error('Cannot get insert result from db')
@@ -121,7 +121,7 @@ export class EntryProcessor {
         .from(this.table.name)
         .update(entry.dirtyRaw)
         .where(this.table.id.name, String(entry.id.raw))
-        .returning(this.table.columns.map((col) => col.name))
+        .returning(this.table.baseColumns.map((col) => col.name))
       const row = rows[0]
       if (row === undefined) {
         throw new Error('Cannot get update result from db')

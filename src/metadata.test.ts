@@ -17,7 +17,7 @@ describe('Table Metadata', () => {
   })
 
   it('Table metadata should have 6 properties', () => {
-    expect(table.columns).toHaveLength(6)
+    expect(table.baseColumns).toHaveLength(6)
   })
 
   describe('Property Metadata', () => {
@@ -85,6 +85,86 @@ describe('Table Metadata', () => {
       expect(property!.generated).toBe(false)
       expect(property!.nullable).toBe(false)
       expect(property!.collection).toBe(true)
+    })
+  })
+})
+
+describe('Table Metadata with Relation Columns', () => {
+  const foreignSchema = object({
+    id: number().set('id', true).set('generated', true),
+  }).set('entity', 'entity_foreign')
+
+  describe('To-One Relation', () => {
+    describe('Source table as owner', () => {
+      const schema = object({
+        id: number().set('id', true).set('generated', true),
+        rel: foreignSchema,
+      }).set('entity', 'entity')
+      const metadata = new Metadata()
+      const sourceTable = metadata.get(schema)
+      const foreignTable = metadata.get(foreignSchema)
+
+      it('Table should have 2 base & 1 relation columns', () => {
+        expect(sourceTable.baseColumns).toHaveLength(2)
+        expect(sourceTable.relationColumns).toHaveLength(1)
+      })
+
+      it('Table should have 1 base & 0 relation columns', () => {
+        expect(foreignTable.baseColumns).toHaveLength(1)
+        expect(foreignTable.relationColumns).toHaveLength(0)
+      })
+
+      it('Join column should be automatically created at source table', () => {
+        expect(sourceTable.column('entity_foreign_id')).not.toBeUndefined()
+      })
+    })
+
+    describe('Foreign table as owner', () => {
+      const schema = object({
+        id: number().set('id', true).set('generated', true),
+        rel: foreignSchema.set('owner', 'foreign'),
+      }).set('entity', 'entity')
+      const metadata = new Metadata()
+      const sourceTable = metadata.get(schema)
+      const foreignTable = metadata.get(foreignSchema)
+
+      it('Table should have 2 base & 1 relation columns', () => {
+        expect(sourceTable.baseColumns).toHaveLength(1)
+        expect(sourceTable.relationColumns).toHaveLength(1)
+      })
+
+      it('Table should have 1 base & 0 relation columns', () => {
+        expect(foreignTable.baseColumns).toHaveLength(2)
+        expect(foreignTable.relationColumns).toHaveLength(0)
+      })
+
+      it('Join column should be automatically created at source table', () => {
+        expect(foreignTable.column('entity_id')).not.toBeUndefined()
+      })
+    })
+  })
+
+  describe('To-Many Relation', () => {
+    const schema = object({
+      id: number().set('id', true).set('generated', true),
+      rel: foreignSchema.array(),
+    }).set('entity', 'entity')
+    const metadata = new Metadata()
+    const sourceTable = metadata.get(schema)
+    const foreignTable = metadata.get(foreignSchema)
+
+    it('Source Table should have 1 base & 1 relation columns', () => {
+      expect(sourceTable.baseColumns).toHaveLength(1)
+      expect(sourceTable.relationColumns).toHaveLength(1)
+    })
+
+    it('Foreign Table should have 2 base & 0 relation columns', () => {
+      expect(foreignTable.baseColumns).toHaveLength(2)
+      expect(foreignTable.relationColumns).toHaveLength(0)
+    })
+
+    it('Join column should be automatically created at foreign table', () => {
+      expect(foreignTable.column('entity_id')).not.toBeUndefined()
     })
   })
 })

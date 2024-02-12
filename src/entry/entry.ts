@@ -12,7 +12,7 @@ export class Entry {
     private readonly registry: EntryRegistry,
     public readonly table: TableMetadata,
   ) {
-    this.properties = table.columns.map(
+    this.properties = table.baseColumns.map(
       (column) => new EntryProperty(parser, registry, this, column),
     )
   }
