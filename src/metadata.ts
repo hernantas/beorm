@@ -48,16 +48,16 @@ export class TableMetadata {
   ) {
     registry.register(this)
 
-    // try to get column
-    SchemaReader.traverse(
-      (schema, innerValue) =>
-        ObjectSchema.is(schema)
-          ? Object.entries(schema.properties).map(([key, schema]) =>
-              createColumn(this, key, schema, true),
-            )
-          : innerValue,
-      schema,
-    )
+    this.columns =
+      SchemaReader.traverse<ColumnMetadata[]>(
+        (schema, innerValue) =>
+          ObjectSchema.is(schema)
+            ? Object.entries(schema.properties).map(([key, schema]) =>
+                createColumn(this, key, schema, true),
+              )
+            : innerValue,
+        schema,
+      ) ?? []
 
     const id = this.columns.find((column) => column.id)
     if (id !== undefined) {
@@ -93,7 +93,6 @@ function createColumn(
     nullable,
     collection,
   }
-  table.columns.push(column)
   return column
 }
 
