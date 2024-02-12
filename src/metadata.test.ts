@@ -24,7 +24,7 @@ describe('Table Metadata', () => {
     it('"normal" property metadata should be declared and sets correctly', () => {
       const property = table.column('normal')
       expect(property).not.toBeUndefined()
-      expect(property!.entity).toBe(table)
+      expect(property!.table).toBe(table)
       expect(property!.name).toBe('normal')
       expect(property!.id).toBe(false)
       expect(property!.generated).toBe(false)
@@ -35,7 +35,7 @@ describe('Table Metadata', () => {
     it('"id" property metadata should be declared and sets correctly', () => {
       const property = table.column('id')
       expect(property).not.toBeUndefined()
-      expect(property!.entity).toBe(table)
+      expect(property!.table).toBe(table)
       expect(property!.name).toBe('id')
       expect(property!.id).toBe(true)
       expect(property!.generated).toBe(false)
@@ -46,7 +46,7 @@ describe('Table Metadata', () => {
     it('"generated" property metadata should be declared and sets correctly', () => {
       const property = table.column('generated')
       expect(property).not.toBeUndefined()
-      expect(property!.entity).toBe(table)
+      expect(property!.table).toBe(table)
       expect(property!.name).toBe('generated')
       expect(property!.id).toBe(false)
       expect(property!.generated).toBe(true)
@@ -57,7 +57,7 @@ describe('Table Metadata', () => {
     it('"nullable" property metadata should be declared and sets correctly', () => {
       const property = table.column('nullable')
       expect(property).not.toBeUndefined()
-      expect(property!.entity).toBe(table)
+      expect(property!.table).toBe(table)
       expect(property!.name).toBe('nullable')
       expect(property!.id).toBe(false)
       expect(property!.generated).toBe(false)
@@ -68,7 +68,7 @@ describe('Table Metadata', () => {
     it('"optional" property metadata should be declared and sets correctly', () => {
       const property = table.column('optional')
       expect(property).not.toBeUndefined()
-      expect(property!.entity).toBe(table)
+      expect(property!.table).toBe(table)
       expect(property!.name).toBe('optional')
       expect(property!.id).toBe(false)
       expect(property!.generated).toBe(false)
@@ -79,7 +79,7 @@ describe('Table Metadata', () => {
     it('"collection" property metadata should be declared and sets correctly', () => {
       const property = table.column('collection')
       expect(property).not.toBeUndefined()
-      expect(property!.entity).toBe(table)
+      expect(property!.table).toBe(table)
       expect(property!.name).toBe('collection')
       expect(property!.id).toBe(false)
       expect(property!.generated).toBe(false)

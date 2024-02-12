@@ -56,7 +56,7 @@ export class ColumnMetadata {
 
   public constructor(
     /** {@link TableMetadata} column owner */
-    public readonly entity: TableMetadata,
+    public readonly table: TableMetadata,
     /** Column name */
     public readonly name: string,
     /** {@link Schema} used to declare column */
@@ -78,7 +78,7 @@ export class ColumnMetadata {
         (schema, prevValue) => ArraySchema.is(schema) || prevValue,
         schema,
       ) ?? false
-    entity.columns.push(this)
+    table.columns.push(this)
   }
 }
 
