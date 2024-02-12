@@ -50,7 +50,7 @@ export class TableMetadata {
     if (id !== undefined) {
       this.id = id
     } else {
-      throw new Error(`"${name}" entity schema must have an id column`)
+      throw new Error(`"${this.name}" entity schema must have an id column`)
     }
   }
 
