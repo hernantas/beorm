@@ -39,8 +39,8 @@ export class TableMetadata {
     traverse(
       (schema, prevValue) =>
         ObjectSchema.is(schema)
-          ? Object.entries(schema.properties).map(
-              ([key, schema]) => new ColumnMetadata(this, key, schema, true),
+          ? Object.entries(schema.properties).map(([key, schema]) =>
+              createColumn(this, key, schema, true),
             )
           : prevValue,
       schema,
@@ -59,42 +59,57 @@ export class TableMetadata {
   }
 }
 
-export class ColumnMetadata {
-  /** Mark if column is an id */
-  public readonly id: boolean
-  /** Mark if column value is generated */
-  public readonly generated: boolean
-  /** Mark if column is nullable column */
-  public readonly nullable: boolean
-  /** Mark if column is collection column */
-  public readonly collection: boolean
-
-  public constructor(
-    /** {@link TableMetadata} column owner */
-    public readonly table: TableMetadata,
-    /** Column name */
-    public readonly name: string,
-    /** {@link Schema} used to declare column */
-    public readonly schema: Schema,
-    /** Mark if column is declared in schema or not */
-    public readonly declared: boolean = false,
-  ) {
-    this.id = readSchema(schema, 'id', boolean().optional()) ?? false
-    this.generated =
-      readSchema(schema, 'generated', boolean().optional()) ?? false
-    this.nullable =
-      traverse(
-        (schema, prevValue) =>
-          NullableSchema.is(schema) || OptionalSchema.is(schema) || prevValue,
-        schema,
-      ) ?? false
-    this.collection =
-      traverse(
-        (schema, prevValue) => ArraySchema.is(schema) || prevValue,
-        schema,
-      ) ?? false
-    table.columns.push(this)
+function createColumn(
+  table: TableMetadata,
+  name: string,
+  schema: Schema,
+  declared: boolean = false,
+): ColumnMetadata {
+  const id: boolean = readSchema(schema, 'id', boolean().optional()) ?? false
+  const generated: boolean =
+    readSchema(schema, 'generated', boolean().optional()) ?? false
+  const nullable: boolean =
+    traverse(
+      (schema, prevValue) =>
+        NullableSchema.is(schema) || OptionalSchema.is(schema) || prevValue,
+      schema,
+    ) ?? false
+  const collection: boolean =
+    traverse(
+      (schema, prevValue) => ArraySchema.is(schema) || prevValue,
+      schema,
+    ) ?? false
+  const column: ColumnMetadata = {
+    table,
+    name,
+    schema,
+    declared,
+    id,
+    generated,
+    nullable,
+    collection,
   }
+  table.columns.push(column)
+  return column
+}
+
+export interface ColumnMetadata {
+  /** {@link TableMetadata} column owner */
+  readonly table: TableMetadata
+  /** Column name */
+  readonly name: string
+  /** {@link Schema} used to declare column */
+  readonly schema: Schema
+  /** Mark if column is declared in schema or not */
+  readonly declared: boolean
+  /** Mark if column is an id */
+  readonly id: boolean
+  /** Mark if column value is generated */
+  readonly generated: boolean
+  /** Mark if column is nullable column */
+  readonly nullable: boolean
+  /** Mark if column is collection column */
+  readonly collection: boolean
 }
 
 /**
